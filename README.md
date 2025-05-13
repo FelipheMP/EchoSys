@@ -1,8 +1,14 @@
 # EchoSys
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![License](https://img.shields.io/github/license/FelipheMP/EchoSys)
-![Made with ❤️](https://img.shields.io/badge/Made%20with-%E2%9D%A4-red)
+<p align="center">
+  <img src="./images/echosys_logo.webp" alt="EchoSys Logo" width="200"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue"/>
+  <img src="https://img.shields.io/github/license/FelipheMP/EchoSys"/>
+  <img src="https://img.shields.io/badge/Made%20with-%E2%9D%A4-red"/>
+</p>
 
 EchoSys is a lightweight Python-based Telegram bot designed to monitor and remotely manage the health of a Linux system or server. It reports on system resources like battery level, CPU usage, memory, disk, and temperature, and also supports remote commands such as shutdown and reboot via Telegram.
 

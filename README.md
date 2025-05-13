@@ -150,10 +150,7 @@ sudo systemctl status echosys
 
 Here’s how the bot outputs information in a Telegram chat:
 
-<img src="./images/echosys_usage01.jpg" height="800"/>
-<img src="./images/echosys_usage02.jpg" height="800"/>
-<img src="./images/echosys_usage03.jpg" height="800"/>
-<img src="./images/echosys_usage04.jpg" height="800"/>
+<img src="./images/echosys_usage01.jpg" height="700"/><img src="./images/echosys_usage02.jpg" height="700"/><img src="./images/echosys_usage03.jpg" height="700"/><img src="./images/echosys_usage04.jpg" height="700"/>
 
 ---
 

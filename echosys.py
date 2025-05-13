@@ -4,6 +4,7 @@ import requests
 import socket
 import psutil
 import threading
+import random
 from dotenv import load_dotenv
 
 # === Force only IPv4 ===
@@ -23,6 +24,30 @@ CHECK_INTERVAL = 120 # Battery check interval (seconds)
 # === GLOBAL FLAGS ===
 pending_shutdown = False
 pending_reboot = False
+user_greeted = {}
+
+greeting_responses = [
+    "🫡 Reporting for duty, Captain Obvious.",
+    "🧠 Yes, yes, hello. Shall we skip the pleasantries?",
+    "😐 Greetings, mortal. I hope this isn't your peak social interaction.",
+    "🚪 Wow, someone knocked. Should I pretend to care?"
+]
+
+sarcastic_responses = [
+    "🙄 Again with the /start? What do you want, a medal? I'm already running, Einstein.",
+    "🤦 Wow. `/start` again. Groundbreaking innovation here.",
+    "🎉 Congrats! You've unlocked... absolutely nothing. I'm still the same bot.",
+    "😐 Still here. Still running. Still unimpressed.",
+    "🤖 Rebooting your expectations... not the bot.",
+    "👏 Great job! You’ve successfully demonstrated your ability to repeat commands.",
+    "📢 Attention! User thinks `/start` is a magic spell. Spoiler: it's not.",
+    "🤡 /start again? Are we stuck in a loop or is this just your thing?",
+    "😴 Oh yay, /start again. My circuits are *thrilled*.",
+    "🧠 Pro tip: You only need to use /start once. Wild, I know.",
+    "🤖 Already running. Still running. Forever running. What more do you want from me?",
+    "⚠️ ERROR 404: Patience not found. Please stop hitting /start.",
+    "🫠 I'm beginning to think you're doing this on purpose..."
+]
 
 # === FUNCTIONS ===
 
@@ -144,8 +169,16 @@ def listen_for_commands():
                     print(f"Ignored message from {chat_id}")
                     continue
 
+                # 
+                if text.strip().lower() in ["/start", f"/start@{BOT_USERNAME}"]:
+                    if chat_id not in start_used_by:        
+                        start_used_by.add(chat_id)
+                        send_telegram_message(random.choice(greeting_responses), chat_id)
+                    else:
+                        send_telegram_message(random.choice(sarcastic_responses), chat_id)
+                
                 # Handle battery charge info
-                if text.strip().lower() in ("/battery", f"/battery@{BOT_USERNAME}"):
+                elif text.strip().lower() in ["/battery", f"/battery@{BOT_USERNAME}"]:
                     battery = get_battery_level()
                     if battery is not None:
                         reply = f"🔋 *Server Battery*: *{battery}%*\n\nStatus: {'✅ Good' if battery > 20 else '⚠️ Low'}"

@@ -301,6 +301,16 @@ def listen_for_commands():
                     )
                     send_telegram_message(message, chat_id)
 
+                # Handle suspend
+                elif text.lower() in ["/suspend", f"/suspend@{BOT_USERNAME}"]:
+                    if chat_id == PERSONAL_CHAT_ID:
+                        send_telegram_message(
+                            "🔋 Suspending system now...", chat_id)
+                        os.system("sudo /sbin/suspend now")
+                    else:
+                        send_telegram_message(
+                            "🚫 You are not authorized to suspend the server.", chat_id)
+
                 # Handle reboot
                 elif text.lower() in ["/reboot", f"/reboot@{BOT_USERNAME}"]:
                     if chat_id == PERSONAL_CHAT_ID:

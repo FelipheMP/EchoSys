@@ -306,7 +306,7 @@ def listen_for_commands():
                     if chat_id == PERSONAL_CHAT_ID:
                         send_telegram_message(
                             "🔋 Suspending system now...", chat_id)
-                        os.system("sudo /sbin/suspend now")
+                        os.system("sudo /bin/systemctl suspend")
                     else:
                         send_telegram_message(
                             "🚫 You are not authorized to suspend the server.", chat_id)

@@ -24,7 +24,7 @@ EchoSys is a lightweight Python-based Telegram bot designed to monitor and remot
   - Temperature sensors
   - Uptime
 - 📡 Remote command support through Telegram:
-  - Secure and confirmed shutdown/reboot commands
+  - Secure and confirmed shutdown/reboot/suspend commands
 - 🌐 IPv4 enforcement for network requests
 - ⏱️ Configurable check intervals
 - 🛠️ Systemd service integration for persistence
@@ -35,12 +35,14 @@ EchoSys is a lightweight Python-based Telegram bot designed to monitor and remot
 
 | Command              | Description                          |
 |----------------------|--------------------------------------|
+| `/start`             | Start conversations		          |
 | `/battery`           | Check current battery level          |
 | `/status`            | Get a full system health report      |
-| `/shutdown`          | Initiate shutdown (requires confirm) |
-| `/confirmshutdown`   | Shutdown confirmation                |
+| `/suspend`		   | Initiate system suspend			  |
 | `/reboot`            | Initiate reboot (requires confirm)   |
 | `/confirmreboot`     | Reboot confirmation                  |
+| `/shutdown`          | Initiate shutdown (requires confirm) |
+| `/confirmshutdown`   | Shutdown confirmation                |
 | `/privacy`           | Show privacy policy                  |
 
 ---
@@ -94,12 +96,12 @@ GROUP_CHAT_ID=-1234567890
 
 ## 🚀 Running the Bot
 
-### ✅ Allow shutdown and reboot without password
+### ✅ Allow shutdown, reboot and suspend without password
 
 Make sure your user has permission by editing the sudoers file with `sudo visudo` and adding:
 
 ```
-yourusername ALL=NOPASSWD: /sbin/shutdown, /sbin/reboot
+yourusername ALL=NOPASSWD: /sbin/shutdown, /sbin/reboot, /bin/systemctl suspend
 ```
 
 ### 🧪 Development mode

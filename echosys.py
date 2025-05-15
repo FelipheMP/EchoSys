@@ -18,6 +18,7 @@ def getaddrinfo_ipv4(*args, **kwargs):
 socket.getaddrinfo = getaddrinfo_ipv4
 
 # === CONFIG ===
+load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_USERNAME = os.getenv("BOT_USERNAME")
 PERSONAL_CHAT_ID = os.getenv("PERSONAL_CHAT_ID")
@@ -82,6 +83,7 @@ def battery_monitor():
     warned_10 = False
     warned_5 = False
     warned_2 = False
+    warn_group = False
 
     while True:
         battery = get_battery_level()
@@ -93,7 +95,11 @@ def battery_monitor():
         if battery <= 1:
             send_telegram_message(
                 "🚨 *Battery CRITICAL (1%)* - Server will shutdown NOW! 🚨", PERSONAL_CHAT_ID)
-            # send_telegram_message("🚨 *Battery CRITICAL (1%)* - Server will shutdown NOW! 🚨", GROUP_CHAT_ID)
+
+            if warn_group:
+                send_telegram_message(
+                    "🚨 *Battery CRITICAL (1%)* - Server will shutdown NOW! 🚨", GROUP_CHAT_ID)
+
             time.sleep(5)  # Give Telegram some time
             os.system("sudo /sbin/shutdown now")
             break
@@ -101,29 +107,34 @@ def battery_monitor():
         elif battery <= 2 and not warned_2:
             send_telegram_message(
                 "⚠️ *Battery Very Low (2%)* - Please plug in! 🚨", PERSONAL_CHAT_ID)
-            send_telegram_message(
-                "⚠️ *Battery Very Low (2%)* - Please plug in! 🚨", GROUP_CHAT_ID)
+
+            if warn_group:
+                send_telegram_message(
+                    "⚠️ *Battery Very Low (2%)* - Please plug in! 🚨", GROUP_CHAT_ID)
             warned_2 = True
 
         elif battery <= 5 and not warned_5:
             send_telegram_message(
                 "⚠️ *Battery Low (5%)* - Connect charger ASAP! ⚡", PERSONAL_CHAT_ID)
-            send_telegram_message(
-                "⚠️ *Battery Low (5%)* - Connect charger ASAP! ⚡", GROUP_CHAT_ID)
+            if warn_group:
+                send_telegram_message(
+                    "⚠️ *Battery Low (5%)* - Connect charger ASAP! ⚡", GROUP_CHAT_ID)
             warned_5 = True
 
         elif battery <= 10 and not warned_10:
             send_telegram_message(
                 "⚠️ *Battery at 10%* - Please prepare to charge. 🔋", PERSONAL_CHAT_ID)
-            send_telegram_message(
-                "⚠️ *Battery at 10%* - Please prepare to charge. 🔋", GROUP_CHAT_ID)
+            if warn_group:
+                send_telegram_message(
+                    "⚠️ *Battery at 10%* - Please prepare to charge. 🔋", GROUP_CHAT_ID)
             warned_10 = True
 
         elif battery == 100 and not warned_100:
             send_telegram_message(
                 f"🔋 *Server Battery*: *{battery}%!*\n\nStatus: *FULLY CHARGED!*", PERSONAL_CHAT_ID)
-            send_telegram_message(
-                f"🔋 *Server Battery*: *{battery}%!*\n\nStatus: *FULLY CHARGED!*", GROUP_CHAT_ID)
+            if warn_group:
+                send_telegram_message(
+                    f"🔋 *Server Battery*: *{battery}%!*\n\nStatus: *FULLY CHARGED!*", GROUP_CHAT_ID)
             warned_100 = True
 
         time.sleep(CHECK_INTERVAL)
@@ -131,7 +142,7 @@ def battery_monitor():
 
 def cancel_shutdown():
     global pending_shutdown
-    time.sleep(30)
+    time.sleep(15)
     if pending_shutdown:
         pending_shutdown = False
         send_telegram_message(
@@ -140,7 +151,7 @@ def cancel_shutdown():
 
 def cancel_reboot():
     global pending_reboot
-    time.sleep(30)
+    time.sleep(15)
     if pending_reboot:
         pending_reboot = False
         send_telegram_message(
@@ -294,7 +305,7 @@ def listen_for_commands():
                         f"All system info stays on your machine and is only sent to chats you configure.\n\n"
 
                         f"Source code: [EchoSys](https://github.com/FelipheMP/EchoSys)\n"
-                        f"License: GPL-3.0\n\n"
+                        f"License: [GPL-3.0](https://github.com/FelipheMP/EchoSys/blob/main/LICENSE)\n\n"
 
                         f"You're free to inspect, modify, and self-host it.\n"
                         f"No third-party servers or tracking involved."
@@ -316,7 +327,7 @@ def listen_for_commands():
                     if chat_id == PERSONAL_CHAT_ID:
                         pending_reboot = True
                         send_telegram_message(
-                            "⚠️ Confirm reboot by typing `/confirmreboot` within 30 seconds!", chat_id)
+                            "⚠️ Confirm reboot by typing `/confirmreboot` within 15 seconds!", chat_id)
                         threading.Thread(target=cancel_reboot,
                                          daemon=True).start()
                     else:
@@ -328,7 +339,7 @@ def listen_for_commands():
                     if chat_id == PERSONAL_CHAT_ID:
                         pending_shutdown = True
                         send_telegram_message(
-                            "⚠️ Confirm shutdown by typing `/confirmshutdown` within 30 seconds!", chat_id)
+                            "⚠️ Confirm shutdown by typing `/confirmshutdown` within 15 seconds!", chat_id)
                         threading.Thread(
                             target=cancel_shutdown, daemon=True).start()
                     else:

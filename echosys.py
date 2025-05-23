@@ -74,7 +74,16 @@ def get_battery_level():
         with open("/sys/class/power_supply/BAT0/capacity", "r") as f:
             return int(f.read().strip())
     except Exception as e:
-        print(f"Error reading battery: {e}")
+        print(f"Error reading battery charge level: {e}")
+        return None
+
+
+def get_battery_status():
+    try:
+        with open("/sys/class/power_supply/BAT0/status", "r") as s:
+            return s.read().strip()
+    except Exception as e:
+        print(f"Error reading battery status: {e}")
         return None
 
 
@@ -86,13 +95,15 @@ def battery_monitor():
     warn_group = False
 
     while True:
-        battery = get_battery_level()
-        if battery is None:
+        battery_charge = get_battery_level()
+        battery_status = get_battery_status()
+
+        if battery_charge is None:
             time.sleep(CHECK_INTERVAL)
             continue
 
-        print(f"[Battery Monitor] Battery level: {battery}%")
-        if battery <= 1:
+        print(f"[Battery Monitor] Battery level: {battery_charge}%")
+        if battery_charge <= 1 and battery_status != "Charging":
             send_telegram_message(
                 "🚨 *Battery CRITICAL (1%)* - Server will shutdown NOW! 🚨", PERSONAL_CHAT_ID)
 
@@ -104,7 +115,7 @@ def battery_monitor():
             os.system("sudo /sbin/shutdown now")
             break
 
-        elif battery <= 2 and not warned_2:
+        elif battery_charge <= 2 and not warned_2 and battery_status != "Charging":
             send_telegram_message(
                 "⚠️ *Battery Very Low (2%)* - Please plug in! 🚨", PERSONAL_CHAT_ID)
 
@@ -113,7 +124,7 @@ def battery_monitor():
                     "⚠️ *Battery Very Low (2%)* - Please plug in! 🚨", GROUP_CHAT_ID)
             warned_2 = True
 
-        elif battery <= 5 and not warned_5:
+        elif battery_charge <= 5 and not warned_5 and battery_status != "Charging":
             send_telegram_message(
                 "⚠️ *Battery Low (5%)* - Connect charger ASAP! ⚡", PERSONAL_CHAT_ID)
             if warn_group:
@@ -121,7 +132,7 @@ def battery_monitor():
                     "⚠️ *Battery Low (5%)* - Connect charger ASAP! ⚡", GROUP_CHAT_ID)
             warned_5 = True
 
-        elif battery <= 10 and not warned_10:
+        elif battery_charge <= 10 and not warned_10 and battery_status != "Charging":
             send_telegram_message(
                 "⚠️ *Battery at 10%* - Please prepare to charge. 🔋", PERSONAL_CHAT_ID)
             if warn_group:
@@ -129,12 +140,12 @@ def battery_monitor():
                     "⚠️ *Battery at 10%* - Please prepare to charge. 🔋", GROUP_CHAT_ID)
             warned_10 = True
 
-        elif battery == 100 and not warned_100:
+        elif battery_charge == 100 and not warned_100 and battery_status == "Charging":
             send_telegram_message(
-                f"🔋 *Server Battery*: *{battery}%!*\n\nStatus: *FULLY CHARGED!*", PERSONAL_CHAT_ID)
+                f"🔋 *Battery*: *{battery_charge}%!*\n\nStatus: *FULLY CHARGED!*", PERSONAL_CHAT_ID)
             if warn_group:
                 send_telegram_message(
-                    f"🔋 *Server Battery*: *{battery}%!*\n\nStatus: *FULLY CHARGED!*", GROUP_CHAT_ID)
+                    f"🔋 *Battery*: *{battery_charge}%!*\n\nStatus: *FULLY CHARGED!*", GROUP_CHAT_ID)
             warned_100 = True
 
         time.sleep(CHECK_INTERVAL)
@@ -215,12 +226,18 @@ def listen_for_commands():
 
                 # Handle battery charge info
                 elif text.strip().lower() in ["/battery", f"/battery@{BOT_USERNAME}"]:
-                    battery = get_battery_level()
-                    if battery is not None:
-                        reply = f"🔋 *Server Battery*: *{battery}%*\n\nStatus: {
-                            '✅ Good' if battery > 20 else '⚠️ Low'}"
+                    battery_charge = get_battery_level()
+                    battery_status = get_battery_status()
+                    if battery_charge is not None:
+                        if battery_status == "Charging":
+                            reply = f"🔋 *Battery*: *{
+                                battery_charge}%*\n\nStatus:🔌{battery_status}"
+                        else:
+                            reply = f"🔋 *Battery*: *{
+                                battery_charge}%*\n\nStatus:❗{battery_status}"
                     else:
                         reply = "❌ Could not read battery level."
+
                     send_telegram_message(reply, chat_id)
 
                 # Handle all server stats
@@ -248,10 +265,11 @@ def listen_for_commands():
 
                     # Battery Status
                     battery_level = get_battery_level()
+                    batt_status = get_battery_status()
                     if battery_level is not None:
-                        battery_status = f"{battery_level}% {
-                            '✅' if battery_level > 20 else '⚠️'}"
+                        battery_charge = f"{battery_level}%"
                         battery_bar = create_bar(battery_level)
+                        battery_status = f"{'🔌' if batt_status == "Charging" else '❗'}"
                     else:
                         battery_status = "Unavailable"
                         battery_bar = "N/A"
@@ -264,11 +282,12 @@ def listen_for_commands():
 
                     # Create final status message
                     message = (
-                        f"📊 *Server Status*\n\n"
+                        f"📊 *Machine Status*\n\n"
 
                         f"🖥️ *CPU:*\n"
-                        f"- Load 1min: `{load1:.2f}`\n- Load 5min: `{
-                            load5:.2f}`\n- Load 15min: `{load15:.2f}`\n"
+                        f"- Load 1min: `{load1:.2f}`\n"
+                        f"- Load 5min: `{load5:.2f}`\n"
+                        f"- Load 15min: `{load15:.2f}`\n"
                         f"- Usage: `{cpu_percent:.1f}%` [{cpu_bar}]\n\n"
 
                         f"🌡️ *Temperatures:*\n"
@@ -287,9 +306,10 @@ def listen_for_commands():
                         f"- Usage: `{disk_percent:.1f}%` [{disk_bar}]\n\n"
 
                         f"🔋 *Battery:*\n"
-                        f"- Status: `{battery_status}`"
-                        + (f" [{battery_bar}]" if battery_bar != "N/A" else "") +
-                        "\n\n"
+                        f"- Status: `{battery_charge}`"
+                        + (f" [{battery_bar}]" if battery_bar != "N/A" else "")
+                        + f"\n-`{battery_status}`{batt_status}"
+                        + "\n\n"
 
                         f"⏳ *Uptime:*\n"
                         f"`{uptime}`"
@@ -299,16 +319,18 @@ def listen_for_commands():
                 # Handle privacy policy
                 elif text.lower() in ["/privacy", f"/privacy@{BOT_USERNAME}"]:
                     message = (
-                        f"🔐 *Privacy Policy*\n\n"
+                        '''
+                        🔐 *Privacy Policy*\n\n"
 
-                        f"EchoSys does not collect or store personal data.\n"
-                        f"All system info stays on your machine and is only sent to chats you configure.\n\n"
+                        EchoSys does not collect or store personal data.\n"
+                        All system info stays on your machine and is only sent to chats you configure.\n\n"
 
-                        f"Source code: [EchoSys](https://github.com/FelipheMP/EchoSys)\n"
-                        f"License: [GPL-3.0](https://github.com/FelipheMP/EchoSys/blob/main/LICENSE)\n\n"
+                        Source code: [EchoSys](https://github.com/FelipheMP/EchoSys)\n"
+                        License: [GPL-3.0](https://github.com/FelipheMP/EchoSys/blob/main/LICENSE)\n\n"
 
-                        f"You're free to inspect, modify, and self-host it.\n"
-                        f"No third-party servers or tracking involved."
+                        You're free to inspect, modify, and self-host it.\n"
+                        No third-party servers or tracking involved.
+                        '''
                     )
                     send_telegram_message(message, chat_id)
 

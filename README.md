@@ -5,6 +5,7 @@
 </p>
 
 <p align="center">
+  <a href="https://deepwiki.com/FelipheMP/EchoSys"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue"/>
   <img src="https://img.shields.io/github/license/FelipheMP/EchoSys"/>
   <img src="https://img.shields.io/badge/Made%20with-%E2%9D%A4-red"/>

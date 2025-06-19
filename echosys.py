@@ -318,18 +318,15 @@ def listen_for_commands():
 
                 # Handle privacy policy
                 elif text.lower() in ["/privacy", f"/privacy@{BOT_USERNAME}"]:
-                    message = (
+                    message = textwrap.dedent(
                         '''
-                        🔐 *Privacy Policy*\n\n"
-
-                        EchoSys does not collect or store personal data.\n"
-                        All system info stays on your machine and is only sent to chats you configure.\n\n"
-
-                        Source code: [EchoSys](https://github.com/FelipheMP/EchoSys)\n"
-                        License: [GPL-3.0](https://github.com/FelipheMP/EchoSys/blob/main/LICENSE)\n\n"
-
-                        You're free to inspect, modify, and self-host it.\n"
-                        No third-party servers or tracking involved.
+                            🔐 *Privacy Policy*\n\n"
+                            EchoSys does not collect or store personal data.\n"
+                            All system info stays on your machine and is only sent to chats you configure.\n\n"
+                            Source code: [EchoSys](https://github.com/FelipheMP/EchoSys)\n"
+                            License: GPL-3.0\n\n"
+                            You're free to inspect, modify, and self-host it.\n"
+                            No third-party servers or tracking involved.
                         '''
                     )
                     send_telegram_message(message, chat_id)

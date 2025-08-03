@@ -263,6 +263,13 @@ def listen_for_commands():
                     disk_percent = disk.percent
                     disk_bar = create_bar(disk_percent)
 
+                    home_disk = psutil.disk_usage('/home')
+                    home_disk_total = home_disk.total / (1024 ** 3)
+                    home_disk_used = home_disk.used / (1024 ** 3)
+                    home_disk_free = home_disk.free / (1024 ** 3)
+                    home_disk_percent = home_disk.percent
+                    home_disk_bar = create_bar(home_disk_percent)
+                    
                     # Battery Status
                     battery_level = get_battery_level()
                     batt_status = get_battery_status()
@@ -300,10 +307,14 @@ def listen_for_commands():
                         f"- Usage: `{mem_percent:.1f}%` [{mem_bar}]\n\n"
 
                         f"💽 *Disk:*\n"
-                        f"- Total: `{disk_total:.2f} GB`\n"
-                        f"- Used: `{disk_used:.2f} GB`\n"
-                        f"- Free: `{disk_free:.2f} GB`\n"
-                        f"- Usage: `{disk_percent:.1f}%` [{disk_bar}]\n\n"
+                        f"- / total: `{disk_total:.2f} GB`\n"
+                        f"- / used:  `{disk_used:.2f} GB`\n"
+                        f"- / free:  `{disk_free:.2f} GB`\n"
+                        f"- / usage: `{disk_percent:.1f}%` [{disk_bar}]\n\n"
+                        f"- /home total: `{home_disk_total:.2f} GB`\n"
+                        f"- /home used:  `{home_disk_used:.2f} GB`\n"
+                        f"- /home free:  `{home_disk_free:.2f} GB`\n"
+                        f"- /home usage: `{home_disk_percent:.1f}%` [{home_disk_bar}]\n\n"
 
                         f"🔋 *Battery:*\n"
                         f"- Status: `{battery_charge}`"
